@@ -1,4 +1,5 @@
 #' @import tictoc
+#' @export
 FastIntegration = function(
   tmp.dir = NULL,
   features.to.integrate = NULL,
@@ -6,11 +7,14 @@ FastIntegration = function(
   nn.k = 100,
   slot = c("data", "counts")
 ) {
+  setDTthreads(threads = 1L)
+  message("Reading anchor file")
   anchors = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/anchors/anchors.rds"))
   offsets = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/offsets.rds"))
   obj.lengths = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/object_ncells.rds"))
-  similarity.matrix = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/similarity_matrix.rds"))
-  sample.tree = Seurat:::BuildSampleTree(similarity.matrix = similarity.matrix)
+  sample.tree = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/sample_tree.rds"))
+
+  message("Reading rna list file")
   object.list = list()
   for (i in 1:length(obj.lengths)) {
     a = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", i, ".rds"))

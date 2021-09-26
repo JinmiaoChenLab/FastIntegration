@@ -4,6 +4,7 @@
 #' @import dplyr
 #' @import Matrix
 #' @importFrom utils getFromNamespace
+#' @export
 FastFindAnchors = function(
   tmp.dir = NULL,
   nCores = NULL,
@@ -62,8 +63,10 @@ FastFindAnchors = function(
   ncel.min = pmin(ncell.a, ncell.b)
   similarity.matrix = similarity.matrix/ncel.min
   similarity.matrix[upper.tri(x = similarity.matrix, diag = TRUE)] = NA
+  BuildSampleTree = getFromNamespace("BuildSampleTree", "Seurat")
+  sample.tree = BuildSampleTree(similarity.matrix)
 
-  saveRDS(similarity.matrix, paste0(tmp.dir, "/FastIntegrationTmp/others/similarity_matrix.rds"), compress = F)
+  saveRDS(sample.tree, paste0(tmp.dir, "/FastIntegrationTmp/others/sample_tree.rds"), compress = F)
   saveRDS(all.anchors, paste0(tmp.dir, "/FastIntegrationTmp/anchors/anchors.rds"), compress = F)
   return(NULL)
 }
@@ -133,7 +136,7 @@ FindAnchorsPair = function(
   return(anchors)
 }
 
-
+#' @export
 BuildIntegrationFile = function(
   rna.list,
   tmp.dir = NULL,

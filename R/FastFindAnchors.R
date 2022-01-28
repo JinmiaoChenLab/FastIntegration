@@ -63,6 +63,8 @@ FastFindAnchors = function(
     paired = paired[-1,]
     paired = data.frame(paired)
     colnames(paired) = c("Var1", "Var2")
+    rm(rna.list)
+    gc(reset = T)
     combinations = paired[!duplicated(paired),]
   }
 

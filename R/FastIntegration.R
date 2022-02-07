@@ -200,8 +200,12 @@ FastRunIntegration = function(
       integrated = query - integration.matrix %*% weight.matrix
     }
   }
-  # integrated[which(integrated < 0.2)] = 0
-  # integrated = Matrix::drop0(integrated)
+  max.cut = max(reference@x)
+  message(max.cut)
+  integrated[which(integrated < 0.1)] = 0
+  integrated[which(integrated > max.cut)] = max.cut
+
+  integrated = Matrix::drop0(integrated)
   dimnames(integrated) = dimnames(query)
   new.expression = cbind(reference, integrated)
 

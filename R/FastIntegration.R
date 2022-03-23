@@ -14,7 +14,7 @@ FastIntegration = function(
   npcs = 1:30,
   nn.k = 100,
   slot = c("data", "counts"),
-  prevent.over.correct = F
+  cut.low = 0.1
 ) {
   data.table::setDTthreads(threads = 1L)
 
@@ -58,7 +58,7 @@ FastIntegration = function(
     nn.k = nn.k,
     sample.tree = sample.tree,
     objects.ncell = obj.lengths,
-    prevent.over.correct = prevent.over.correct
+    cut.low = cut.low
   )
 }
 
@@ -73,7 +73,7 @@ FastPairwiseIntegrateReference = function(
   nn.k,
   sample.tree,
   objects.ncell,
-  prevent.over.correct = F
+  cut.low
 ) {
 
   cellnames.list = list()
@@ -118,7 +118,7 @@ FastPairwiseIntegrateReference = function(
       input.pca = input.pca,
       id.table = id.table,
       nn.k = nn.k,
-      prevent.over.correct = prevent.over.correct
+      cut.low = cut.low
     )
 
     object.list[[as.character(ii)]] = integrated.matrix
@@ -138,7 +138,7 @@ FastRunIntegration = function(
   input.pca,
   id.table,
   nn.k,
-  prevent.over.correct = F
+  cut.low = 0.1
 ) {
 
   if (dim(filtered.anchors)[1] > 100000) {
@@ -178,31 +178,17 @@ FastRunIntegration = function(
     integrated = pbmcapply::pbmclapply(
       1:length(ss),
       function(i) {
-        if (prevent.over.correct) {
-          corrected = integration.matrix %*% weight.matrix[,ss[[i]]]
-          corrected = RmOutlierMatrix(corrected)
-          integrated = query[,ss[[i]]] - corrected
-
-        }else {
-          integrated = query[,ss[[i]]] - integration.matrix %*% weight.matrix[,ss[[i]]]
-        }
+        integrated = query[,ss[[i]]] - integration.matrix %*% weight.matrix[,ss[[i]]]
       },
       mc.cores = min(ceiling(dim(query)[2]/50000), 40)
     )
     integrated = do.call("cbind", integrated)
   }else {
-    if (prevent.over.correct) {
-      corrected = integration.matrix %*% weight.matrix
-      corrected = RmOutlierMatrix(corrected)
-      integrated = query - corrected
-
-    }else {
-      integrated = query - integration.matrix %*% weight.matrix
-    }
+    integrated = query - integration.matrix %*% weight.matrix
   }
-  max.cut = max(reference@x)
-  message(max.cut)
-  integrated[which(integrated < 0.1)] = 0
+  max.cut = max(c(reference@x, query@x))
+
+  integrated[which(integrated < cut.low)] = 0
   integrated[which(integrated > max.cut)] = max.cut
 
   integrated = Matrix::drop0(integrated)
@@ -238,7 +224,12 @@ FastFindWeights = function(
   )
 
   distances = Seurat::Distances(object = knn_2_2)
+  a = as.numeric(distances[,ncol(x = distances)]/distances[,2])
+  b = distances/distances[,2]
+  b = which(b > qnorm(0.99, mean(a), sd(a)))
+
   distances = 1 - (distances / distances[, ncol(x = distances)])
+  distances[b] = 0
   cell.index = Seurat::Indices(object = knn_2_2)
   FindWeightsC = getFromNamespace("FindWeightsC", "Seurat")
   weights = FindWeightsC(
@@ -253,23 +244,8 @@ FastFindWeights = function(
     display_progress = TRUE
   )
 
+  print("aa")
+
   return(weights)
 }
 
-RmOutlierMatrix = function(m){
-  m = as.matrix(m)
-  for (i in 1:nrow(m)) {
-    Q <- quantile(m[i,], probs=c(.25, .75), na.rm = FALSE)
-    iqr <- IQR(m[i,])
-    up <-  Q[2]+1.5*iqr
-    low<- Q[1]-1.5*iqr
-    if(up < max(m[i,])) {
-      m[i,which(m[i,] > up)] = up
-    }
-    if (low > min(m[i,])) {
-      m[i,which(m[i,] < low)] = low
-    }
-  }
-  m = as(m, "sparseMatrix")
-  return(m)
-}

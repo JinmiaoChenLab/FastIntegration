@@ -21,7 +21,7 @@ FastFindAnchors = function(
 
   message("Finding all pairwise anchors")
 
-  if (nSample > 100) {
+  if (nSample >= 50) {
     rna.list = pbmcapply::pbmclapply(
       1:nSample, function(i) {
         rna = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", i,".rds"))
@@ -93,7 +93,7 @@ FastFindAnchors = function(
   data.table::setindex(all.anchors, dataset1)
 
   message("Merging data")
-  if (nSample <= 100) {
+  if (nSample < 50) {
     anchor.group <- all.anchors %>% group_by(dataset1, dataset2) %>% summarise(n = n())
     similarity.matrix = matrix(data = 0, ncol = nSample, nrow = nSample)
     similarity.matrix[lower.tri(similarity.matrix, diag=FALSE) | upper.tri(similarity.matrix, diag=FALSE)] = anchor.group$n
@@ -121,11 +121,11 @@ FastFindAnchors = function(
       rna.bind = cbind(rna.bind, rna@assays$RNA@data[features,])
     }
   } else {
-    n = ceiling(nSample/100)
+    n = ceiling(nSample/50)
     rna.list = pbmcapply::pbmclapply(
       1:n, function(i) {
-        start = (i-1)*100 + 1
-        end = min(nSample, i*100)
+        start = (i-1)*50 + 1
+        end = min(nSample, i*50)
         rna.bind = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", start,".rds"))
         rna.bind = rna.bind@assays$RNA@data[features,]
         for (j in (start+1):end) {

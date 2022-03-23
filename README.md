@@ -28,10 +28,8 @@ library(FastIntegration)
 # rna.list is the list of seurat object
 data = OneStopIntegration(
   rna.list = rna.list, 
-  tmp.dir = "../test/", 
-  max.cores = 30,
-  feature.to.integration = NULL,
-  feature.to.return = NULL
+  tmp.dir = "./test/", 
+  max.cores = 30
 )
 
 ```
@@ -49,8 +47,6 @@ FastFindAnchors(tmp.dir = "./", nCores = 50)
 genes = readRDS("FastIntegrationTmp/raw/1.rds")
 genes = rownames(genes)
 idx = split(1:length(genes), cut(1:length(genes), 20, labels = FALSE))
-pca = readRDS("raw_pca.rds")
-
 pbmclapply(
   1:20, function(i) {
     rna.integrated = FastIntegration(tmp.dir = "./", npcs = 1:30, slot = "data",

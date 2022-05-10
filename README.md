@@ -34,6 +34,7 @@ for (i in 1:length(rna.list)) {
   rna.list[[i]] = subset(rna.list[[i]], features = overlapped.gene)
   rna.list[[i]] = NormalizeData(rna.list[[i]])
   rna.list[[i]] = FindVariableFeatures(rna.list[[i]])
+  rna.list[[i]] = RenameCells(rna.list[[i]], new.names = paste0(Cells(rna.list[[i]]), "--", i))
 }
 
 ```

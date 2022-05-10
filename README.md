@@ -79,7 +79,7 @@ pbmclapply(
 
 ### After integration
 ```R
-##### use the variable features for integration (For very big dataset) ##### 
+##### create Seurat obj with the variable features of integration (For very big dataset) ##### 
 features = readRDS("FastIntegrationTmp/others/features.rds")
 rna.data = pbmclapply(
   1:20, function(i) {

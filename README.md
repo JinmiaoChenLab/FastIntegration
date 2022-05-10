@@ -22,6 +22,24 @@ devtools::install_github("git@github.com:JinmiaoChenLab/FastIntegrate.git")
 
 ## Usage
 
+### Preprocess
+```R
+library(Seurat)
+library(pbmcapply)
+rna.list = readRDS("rna_list.rds") # read list of Seurat object, each element in list is a sample
+
+# make all samples have same genes
+overlapped.gene = Reduce(intersect, lapply(rna.list, rownames))
+for (i in 1:length(rna.list)) {
+  rna.list[[i]] = subset(rna.list[[i]], features = overlapped.gene)
+  rna.list[[i]] = NormalizeData(rna.list[[i]])
+  rna.list[[i]] = FindVariableFeatures(rna.list[[i]])
+}
+
+```
+
+
+
 ### Onestop function
 ```R
 library(FastIntegration)
@@ -54,6 +72,50 @@ pbmclapply(
     saveRDS(rna.integrated, paste0("FastIntegrationTmp/inte/inte_", i, ".rds"), compress = F)
   }, mc.cores = 20
 )
+
+```
+
+
+### After integration
+```R
+##### use the variable features for integration (For very big dataset) ##### 
+features = readRDS("FastIntegrationTmp/others/features.rds")
+rna.data = pbmclapply(
+  1:20, function(i) {
+    rna = readRDS(paste0("./FastIntegrationTmp/inte/inte_", i, ".rds"))
+    rna = rna[intersect(rownames(rna), features),]
+    return(rna)
+  }, mc.cores = 20
+)
+rna.data = do.call(rbind, rna.data)
+rna.data = CreateSeuratObject(rna.data)
+rna.data = ScaleData(rna.data, features = features)
+rna.data = RunPCA(rna.data, features = features, npcs = 50)
+rna.data = FindNeighbors(rna.data, dims = 1:50)
+rna.data = FindClusters(rna.data, graph.name = "RNA_snn", algorithm = 2)
+rna.data = RunUMAP(rna.data, dims = 1:50)
+
+
+##### select varibale gene based on integrated data  (For dataset with less than 100 samples) #####
+rna.data = pbmclapply(
+  1:20, function(i) {
+    rna = readRDS(paste0("FastIntegrationTmp/inte/inte_", i, ".rds"))
+    return(rna)
+  }, mc.cores = 20
+)
+
+rna.data = do.call(rbind, rna.data)
+rna.data = CreateSeuratObject(rna.data)
+features = readRDS("FastIntegrationTmp/others/features.rds")
+rna.data = CreateSeuratObject(rna.data@assays$RNA@data)
+rna.data = FindVariableFeatures(rna.data, nfeatures = 2000)
+features = VariableFeatures(rna.data)[grep("^TR", VariableFeatures(rna.data), invert = T)]
+features = features[grep("^IG",  features, invert = T)]
+rna.data = ScaleData(rna.data, features = features)
+rna.data = RunPCA(rna.data, features = features)
+rna.data = FindNeighbors(rna.data, dims = 1:50, nn.method = "rann")
+rna.data = FindClusters(rna.data, resolution = 0.5, algorithm = 2)
+rna.data = RunUMAP(rna.data, dims = 1:50)
 
 ```
 

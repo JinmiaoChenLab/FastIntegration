@@ -14,6 +14,20 @@ FastIntegration requires the following packages:
 * [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)
 * [pbmcapply](https://cran.r-project.org/web/packages/pbmcapply/index.html)
 
+We highly recommend you to build R with openblas which will accelerate integration 2-3x times.
+
+Here is the common way to do it:
+
+sudo yum install -y openblas openblas-threads openblas-openmp # for centos
+
+sudo apt-get install libopenblas-dev # for debian
+
+./configure --enable-R-shlib --enable-byte-compiled-packages \
+
+  --enable-BLAS-shlib --enable-memory-profiling \
+  
+  --with-blas="-lopenblas"
+  
 ## Installation
 
 ```R
@@ -107,8 +121,6 @@ rna.data = pbmclapply(
 
 rna.data = do.call(rbind, rna.data)
 rna.data = CreateSeuratObject(rna.data)
-features = readRDS("FastIntegrationTmp/others/features.rds")
-rna.data = CreateSeuratObject(rna.data@assays$RNA@data)
 rna.data = FindVariableFeatures(rna.data, nfeatures = 2000)
 features = VariableFeatures(rna.data)[grep("^TR", VariableFeatures(rna.data), invert = T)]
 features = features[grep("^IG",  features, invert = T)]

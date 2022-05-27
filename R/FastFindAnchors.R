@@ -122,7 +122,7 @@ FastFindAnchors = function(
     }
   } else {
 
-    idx = split(sample(1:nSample, size = nSample), cut(1:nSample, round(nSample/50), labels = FALSE))
+    idx = split(sample(1:nSample, size = nSample), cut(1:nSample, ceiling(nSample/50), labels = FALSE))
     rna.list = pbmcapply::pbmclapply(
       idx, function(i) {
 

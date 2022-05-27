@@ -121,25 +121,40 @@ FastFindAnchors = function(
       rna.bind = cbind(rna.bind, rna@assays$RNA@data[features,])
     }
   } else {
-    n = ceiling(nSample/50)
+
+    idx = split(sample(1:nSample, size = nSample), cut(1:nSample, round(nSample/50), labels = FALSE))
     rna.list = pbmcapply::pbmclapply(
-      1:n, function(i) {
-        start = (i-1)*50 + 1
-        end = min(nSample, i*50)
-        rna.bind = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", start,".rds"))
-        rna.bind = rna.bind@assays$RNA@data[features,]
-        for (j in (start+1):end) {
-          rna = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", j,".rds"))
-          rna.bind = cbind(rna.bind, rna@assays$RNA@data[features,])
+      idx, function(i) {
+
+        rna.bind = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", i[1],".rds"))@assays$RNA@data[features,]
+        for (j in i[2:length(i)]) {
+          rna.bind = cbind(rna.bind, readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", j,".rds"))@assays$RNA@data[features,])
         }
         return(rna.bind)
-      }, mc.cores = n
+      }, mc.cores = length(idx)
     )
+    rna.bind = do.call(cbind, rna.list)
 
-    rna.bind = rna.list[[1]]
-    for (i in 2:n) {
-      rna.bind = cbind(rna.bind, rna.list[[i]])
-    }
+
+    # n = ceiling(nSample/50)
+    # rna.list = pbmcapply::pbmclapply(
+    #   1:n, function(i) {
+    #     start = (i-1)*50 + 1
+    #     end = min(nSample, i*50)
+    #     rna.bind = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", start,".rds"))
+    #     rna.bind = rna.bind@assays$RNA@data[features,]
+    #     for (j in (start+1):end) {
+    #       rna = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", j,".rds"))
+    #       rna.bind = cbind(rna.bind, rna@assays$RNA@data[features,])
+    #     }
+    #     return(rna.bind)
+    #   }, mc.cores = n
+    # )
+    #
+    # rna.bind = rna.list[[1]]
+    # for (i in 2:n) {
+    #   rna.bind = cbind(rna.bind, rna.list[[i]])
+    # }
   }
 
   rna.bind = ScaleData(rna.bind, verbose = F)

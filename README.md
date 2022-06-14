@@ -122,11 +122,10 @@ rna.data = pbmclapply(
 rna.data = do.call(rbind, rna.data)
 rna.data = CreateSeuratObject(rna.data)
 rna.data = FindVariableFeatures(rna.data, nfeatures = 2000)
-features = VariableFeatures(rna.data)[grep("^TR", VariableFeatures(rna.data), invert = T)]
-features = features[grep("^IG",  features, invert = T)]
+features = VariableFeatures(rna.data)
 rna.data = ScaleData(rna.data, features = features)
 rna.data = RunPCA(rna.data, features = features)
-rna.data = FindNeighbors(rna.data, dims = 1:50, nn.method = "rann")
+rna.data = FindNeighbors(rna.data, dims = 1:50)
 rna.data = FindClusters(rna.data, resolution = 0.5, algorithm = 2)
 rna.data = RunUMAP(rna.data, dims = 1:50)
 

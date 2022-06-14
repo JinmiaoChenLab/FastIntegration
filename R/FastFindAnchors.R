@@ -84,7 +84,13 @@ FastFindAnchors = function(
     mc.cores = nCores
   )
 
-  all.anchors = do.call(what = 'rbind', args = all.anchors)
+
+  if (nSample == 2) {
+    all.anchors = all.anchors$value[[1]]
+  } else {
+    all.anchors = do.call(what = 'rbind', args = all.anchors)
+  }
+
   all.anchors = rbind(all.anchors, all.anchors[, c(2, 1, 3)])
   # AddDatasetID = getFromNamespace("AddDatasetID", "Seurat")
   all.anchors = Seurat:::AddDatasetID(anchor.df = all.anchors, offsets = offsets, obj.lengths = object.ncells)
@@ -135,26 +141,6 @@ FastFindAnchors = function(
     )
     rna.bind = do.call(cbind, rna.list)
 
-
-    # n = ceiling(nSample/50)
-    # rna.list = pbmcapply::pbmclapply(
-    #   1:n, function(i) {
-    #     start = (i-1)*50 + 1
-    #     end = min(nSample, i*50)
-    #     rna.bind = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", start,".rds"))
-    #     rna.bind = rna.bind@assays$RNA@data[features,]
-    #     for (j in (start+1):end) {
-    #       rna = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", j,".rds"))
-    #       rna.bind = cbind(rna.bind, rna@assays$RNA@data[features,])
-    #     }
-    #     return(rna.bind)
-    #   }, mc.cores = n
-    # )
-    #
-    # rna.bind = rna.list[[1]]
-    # for (i in 2:n) {
-    #   rna.bind = cbind(rna.bind, rna.list[[i]])
-    # }
   }
 
   rna.bind = ScaleData(rna.bind, verbose = F)

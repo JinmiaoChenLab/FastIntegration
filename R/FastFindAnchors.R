@@ -187,8 +187,8 @@ FindAnchorsPair = function(
   ncell1 = ncol(object.1)
   ncell2 = ncol(object.2)
 
-  object.1 = Seurat::ScaleData(object.1, features = features)
-  object.2 = Seurat::ScaleData(object.2, features = features)
+  object.1 = Seurat::ScaleData(object.1, features = features, verbose = F)
+  object.2 = Seurat::ScaleData(object.2, features = features, verbose = F)
 
   object.1[["ToIntegrate"]] = object.1[["RNA"]]
   DefaultAssay(object = object.1) = "ToIntegrate"
@@ -197,7 +197,7 @@ FindAnchorsPair = function(
   DefaultAssay(object = object.2) = "ToIntegrate"
 
 
-  object.pair = Seurat::RunCCA(
+  object.pair = Seurat:::RunCCA(
     object1 = object.1,
     object2 = object.2,
     assay1 = "ToIntegrate",

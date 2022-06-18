@@ -7,7 +7,8 @@ FastFindAnchors = function(
   nCores = NULL,
   k.filter = 100,
   k.anchor = 5,
-  sample.cut = 50
+  sample.cut = 50,
+  verbose = T
 ) {
 
   nCores = nCores %||% parallel::detectCores()
@@ -20,7 +21,9 @@ FastFindAnchors = function(
   combinations = expand.grid(1:nSample, 1:nSample)
   combinations = combinations[combinations$Var1 < combinations$Var2, , drop = FALSE]
 
-  message("Finding all pairwise anchors")
+  if (verbose == T) {
+    message("Finding all pairwise anchors")
+  }
 
   if (nSample >= sample.cut) {
     rna.list = pbmcapply::pbmclapply(
@@ -79,7 +82,8 @@ FastFindAnchors = function(
         k.filter = k.filter,
         k.anchor = k.anchor,
         tmp.dir = tmp.dir,
-        features = features
+        features = features,
+        verbose = verbose
       )
     },
     mc.cores = nCores
@@ -99,7 +103,9 @@ FastFindAnchors = function(
   data.table::setindex(all.anchors, dataset2)
   data.table::setindex(all.anchors, dataset1)
 
-  message("Merging data")
+  if (verbose == T) {
+    message("Merging data")
+  }
   if (nSample <= sample.cut) {
     anchor.group <- all.anchors %>% group_by(dataset1, dataset2) %>% summarise(n = n())
     similarity.matrix = matrix(data = 0, ncol = nSample, nrow = nSample)
@@ -160,7 +166,8 @@ FindAnchorsPair = function(
   offsets,
   k.filter,
   k.anchor,
-  features
+  features,
+  verbose= F
 ) {
 
   i = combinations[row, 1]
@@ -215,7 +222,7 @@ FindAnchorsPair = function(
     k.filter = k.filter,
     k.anchor = k.anchor,
     nn.method = "rann",
-    dims = 1:30
+    dims = 1:30, verbose = F
   )
   anchors[, 1] = anchors[, 1] + offsets[i]
   anchors[, 2] = anchors[, 2] + offsets[j]
@@ -227,9 +234,13 @@ BuildIntegrationFile = function(
   rna.list,
   tmp.dir = NULL,
   nCores = NULL,
-  nfeatures = 2000
+  nfeatures = 2000,
+  verbose = F
 ) {
-  message("Checking the rna list")
+  if (verbose == T) {
+    message("Checking the rna list")
+  }
+
   rna.list = SeuratObject:::CheckDuplicateCellNames(rna.list)
   nCores = nCores %||% parallel::detectCores()
 
@@ -247,8 +258,9 @@ BuildIntegrationFile = function(
     dir.create(paste0(tmp.dir, "/FastIntegrationTmp/others"))
     dir.create(paste0(tmp.dir, "/FastIntegrationTmp/inte"))
   }
-
-  message("Splitting and saving rna list in tmp dir")
+  if (verbose == T) {
+    message("Splitting and saving rna list in tmp dir")
+  }
   pbmcapply::pbmclapply(
     1:length(rna.list), function(i) {
       rna = rna.list[[i]]

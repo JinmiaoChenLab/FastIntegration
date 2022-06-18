@@ -14,19 +14,25 @@ FastIntegration = function(
   npcs = 1:30,
   nn.k = 100,
   slot = c("data", "counts"),
-  cut.low = 0.1
+  cut.low = 0.1,
+  verbose = T
 ) {
   data.table::setDTthreads(threads = 1L)
 
   input.pca = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/raw_pca.rds"))
   input.pca = input.pca@cell.embeddings[,npcs]
-  message("Reading anchor file")
+  if (verbose == T) {
+    message("Reading anchor file")
+  }
+
   anchors = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/anchors/anchors.rds"))
   offsets = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/offsets.rds"))
   obj.lengths = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/object_ncells.rds"))
   sample.tree = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/sample_tree.rds"))
 
-  message("Reading rna list file")
+  if (verbose == T) {
+    message("Reading rna list file")
+  }
   object.list = list()
   for (i in 1:length(obj.lengths)) {
     a = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/raw/", i, ".rds"))
@@ -58,7 +64,8 @@ FastIntegration = function(
     nn.k = nn.k,
     sample.tree = sample.tree,
     objects.ncell = obj.lengths,
-    cut.low = cut.low
+    cut.low = cut.low,
+    verbose = verbose
   )
 }
 
@@ -73,7 +80,8 @@ FastPairwiseIntegrateReference = function(
   nn.k,
   sample.tree,
   objects.ncell,
-  cut.low
+  cut.low,
+  verbose = T
 ) {
 
   cellnames.list = list()
@@ -97,17 +105,17 @@ FastPairwiseIntegrateReference = function(
     object.1 = object.list[[merge.pair[1]]]
     object.2 = object.list[[merge.pair[2]]]
 
-    tictoc::tic("Filtering anchors")
     filtered.anchors = data.frame(anchors[dataset1 %in% datasets$object1 & dataset2 %in% datasets$object2,])
-    tictoc::toc()
 
-    message(
-      "Merging dataset ",
-      paste(datasets$object2, collapse = " "),
-      " into ",
-      paste(datasets$object1, collapse = " ")
-    )
-    message(paste0("length1:", length1, "," , "length2:", length2))
+    if (verbose == T) {
+      message(
+        "Merging dataset ",
+        paste(datasets$object2, collapse = " "),
+        " into ",
+        paste(datasets$object1, collapse = " ")
+      )
+      message(paste0("length1:", length1, "," , "length2:", length2))
+    }
 
     integrated.matrix = FastRunIntegration(
       filtered.anchors = filtered.anchors,
@@ -148,16 +156,14 @@ FastRunIntegration = function(
     filtered.anchors = data.frame(filtered.anchors)
   }
 
-  tictoc::tic("Getting cell offsets")
   cells1 = colnames(x = reference)
   cells2 = colnames(x = query)
   cell1.offset = match(id.table[paste0(filtered.anchors$dataset1, "_", filtered.anchors$cell1),"X2"], cells1)
   cell2.offset = match(id.table[paste0(filtered.anchors$dataset2, "_", filtered.anchors$cell2),"X2"], cells2)
   filtered.anchors[, 1] = cell1.offset
   filtered.anchors[, 2] = cell2.offset
-  tictoc::toc()
 
-  tictoc::tic("Weighting")
+
   weight.matrix = FastFindWeights(
     cells1,
     cells2,
@@ -165,12 +171,9 @@ FastRunIntegration = function(
     reduction = input.pca,
     nn.k = nn.k
   )
-  tictoc::toc()
-
   anchors1 = cells1[filtered.anchors[, "cell1"]]
   anchors2 = cells2[filtered.anchors[, "cell2"]]
 
-  tictoc::tic("integrating data")
   # IntegrateDataC = getFromNamespace("IntegrateDataC", "Seurat")
   integration.matrix = query[, anchors2] - reference[, anchors1]
   if (dim(query)[2] > 100000) {
@@ -194,8 +197,6 @@ FastRunIntegration = function(
   integrated = Matrix::drop0(integrated)
   dimnames(integrated) = dimnames(query)
   new.expression = cbind(reference, integrated)
-
-  tictoc::toc()
 
   return(new.expression)
 }
@@ -241,11 +242,8 @@ FastFindWeights = function(
     anchor_score = anchors[, "score"],
     min_dist = 0,
     sd = 1,
-    display_progress = TRUE
+    display_progress = F
   )
-
-  print("aa")
-
   return(weights)
 }
 

@@ -225,12 +225,12 @@ FastFindWeights = function(
   )
 
   distances = Seurat::Distances(object = knn_2_2)
-  a = as.numeric(distances[,ncol(x = distances)]/distances[,2])
-  b = distances/distances[,2]
-  b = which(b > qnorm(0.99, mean(a), sd(a)))
-
-  distances = 1 - (distances / distances[, ncol(x = distances)])
-  distances[b] = 0
+  # a = as.numeric(distances[,ncol(x = distances)]/distances[,2])
+  # b = distances/distances[,2]
+  # b = which(b > qnorm(0.99, mean(a), sd(a)))
+  #
+  # distances = 1 - (distances / distances[, ncol(x = distances)])
+  # distances[b] = 0
   cell.index = Seurat::Indices(object = knn_2_2)
   FindWeightsC = getFromNamespace("FindWeightsC", "Seurat")
   weights = FindWeightsC(

@@ -56,6 +56,8 @@ for (i in 1:length(rna.list)) {
 
 
 ### Onestop function
+
+For large sample size (> 200 samples), we recommend to use step by step integration.
 ```R
 library(FastIntegration)
 # rna.list is the list of seurat object
@@ -76,6 +78,13 @@ library(FastIntegration)
 # rna.list is the list of seurat object
 BuildIntegrationFile(rna.list = rna.list, tmp.dir = "./", nCores = 50)
 FastFindAnchors(tmp.dir = "./", nCores = 50)
+
+# close current R session and open a new one to clean the memory (This is important for large data integration)
+# In the new session, please just set work directory and do not load any data. Then run the following codes:
+
+library(Seurat)
+library(pbmcapply)
+library(FastIntegration)
 
 genes = readRDS("FastIntegrationTmp/raw/1.rds")
 genes = rownames(genes)

@@ -1,7 +1,7 @@
 Package: FastIntegration
 Type: Package
 Title: Fast Integration of Single-cell Data
-Version: 0.1.0
+Version: 1.1.0
 Author: c(
   person(given = "Mengwei", family = "Li", email = "li_mengwei@immunol.a-star.edu.sg", role = "aut"),
   person(given = "Xiaomeng", family = "Zhang", email = "zhang_xiao_meng@immunol.a-star.edu.sg", role = "aut"),

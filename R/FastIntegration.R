@@ -191,6 +191,21 @@ FastRunIntegration = function(
   }
   max.cut = max(c(reference@x, query@x))
 
+  # row.min = apply(reference, 1, FUN = function(x) {
+  #   if (max(x) == 0) {
+  #     return(0)
+  #   }else {
+  #     return(min(x[x > 0]))
+  #   }
+  # })
+  # for (i in as.numeric(which(row.min > 0))) {
+  #   j = which(query[i,] == 0 & integrated[i,] < row.min[which(row.min > 0)[i]])
+  #   if (length(j) > 0) {
+  #     integrated[i, j] = 0
+  #   }
+  # }
+  # integrated[which(query == 0 & integrated < 0.5)] = 0
+  # cut.low = 0
   integrated[which(integrated < cut.low)] = 0
   integrated[which(integrated > max.cut)] = max.cut
 

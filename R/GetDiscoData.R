@@ -10,7 +10,7 @@ GetDiscoSample = function(
       if (verbose) {
         message("Starting to download metadata from DISCO database")
       }
-      meta = fromJSON("https://www.immunesinglecell.org/api/sample/all")
+      meta = fromJSON("https://www.immunesinglecell.org/api/vishuo/sample/all")
       return(meta)
     },
     error=function(cond) {

@@ -1,26 +1,31 @@
-Package: FastIntegration
 Type: Package
+Package: FastIntegration
 Title: Fast Integration of Single-cell Data
 Version: 1.1.0
-Author: c(
-  person(given = "Mengwei", family = "Li", email = "li_mengwei@immunol.a-star.edu.sg", role = "aut"),
-  person(given = "Xiaomeng", family = "Zhang", email = "zhang_xiao_meng@immunol.a-star.edu.sg", role = "aut"),
-  person(given = "Jinmiao", family = "Chen", email = "chen_jinmiao@immunol.a-star.edu.sg", role = "aut")
-  )
-Description: FastIntegrate integrates thousands of scRNA-seq datasets and outputs batch-corrected values for downstream analysis
+Author: c( person(given = "Mengwei", family = "Li", email =
+    "li_mengwei@immunol.a-star.edu.sg", role = "aut"), person(given =
+    "Xiaomeng", family = "Zhang", email =
+    "zhang_xiao_meng@immunol.a-star.edu.sg", role = "aut"), person(given =
+    "Jinmiao", family = "Chen", email =
+    "chen_jinmiao@immunol.a-star.edu.sg", role = "aut") )
+Description: FastIntegrate integrates thousands of scRNA-seq datasets and
+    outputs batch-corrected values for downstream analysis
 License: GPL-3
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.1.1
 Depends:
+    data.table,
     R (>= 4.0.0),
     Seurat (>= 4.0.0),
-    SeuratObject (>= 4.0.0),
-    data.table
+    SeuratObject (>= 4.0.0)
 Imports:
-    Matrix,
-    tictoc,
     dplyr,
+    Matrix,
     parallel,
-    pbmcapply
-LinkingTo: Rcpp (>= 0.11.0), RcppEigen
+    pbmcapply,
+    Rfast,
+    tictoc
+LinkingTo: 
+    Rcpp (>= 0.11.0),
+    RcppEigen
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.0

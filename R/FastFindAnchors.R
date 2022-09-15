@@ -106,7 +106,7 @@ FastFindAnchors = function(
   if (verbose == T) {
     message("Merging data")
   }
-  if (nSample <= sample.cut) {
+  if (nSample < sample.cut) {
     anchor.group <- all.anchors %>% group_by(dataset1, dataset2) %>% summarise(n = n())
     similarity.matrix = matrix(data = 0, ncol = nSample, nrow = nSample)
     similarity.matrix[lower.tri(similarity.matrix, diag=FALSE) | upper.tri(similarity.matrix, diag=FALSE)] = anchor.group$n

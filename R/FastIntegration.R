@@ -189,7 +189,7 @@ FastRunIntegration = function(
   }else {
     integrated = query - integration.matrix %*% weight.matrix
   }
-  max.cut = max(c(reference@x, query@x))
+  # max.cut = max(c(reference@x, query@x))
 
   # row.min = apply(reference, 1, FUN = function(x) {
   #   if (max(x) == 0) {
@@ -206,10 +206,13 @@ FastRunIntegration = function(
   # }
   # integrated[which(query == 0 & integrated < 0.5)] = 0
   # cut.low = 0
-  integrated[which(integrated < cut.low)] = 0
-  integrated[which(integrated > max.cut)] = max.cut
+  if(cut.low >= 0) {
+    integrated[which(integrated < cut.low)] = 0
+    integrated = Matrix::drop0(integrated)
+  }
+  # integrated[which(integrated > max.cut)] = max.cut
 
-  integrated = Matrix::drop0(integrated)
+
   dimnames(integrated) = dimnames(query)
   new.expression = cbind(reference, integrated)
 

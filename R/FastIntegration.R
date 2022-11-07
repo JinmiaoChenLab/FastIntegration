@@ -29,6 +29,7 @@ FastIntegration = function(
   offsets = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/offsets.rds"))
   obj.lengths = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/object_ncells.rds"))
   sample.tree = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/sample_tree.rds"))
+  median.nfeature = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/median_nfeature.rds"))
 
   if (verbose == T) {
     message("Reading rna list file")
@@ -65,7 +66,8 @@ FastIntegration = function(
     sample.tree = sample.tree,
     objects.ncell = obj.lengths,
     cut.low = cut.low,
-    verbose = verbose
+    verbose = verbose,
+    median.nfeature = median.nfeature
   )
 }
 
@@ -81,7 +83,8 @@ FastPairwiseIntegrateReference = function(
   sample.tree,
   objects.ncell,
   cut.low,
-  verbose = T
+  verbose = T,
+  median.nfeature
 ) {
 
   cellnames.list = list()
@@ -91,9 +94,15 @@ FastPairwiseIntegrateReference = function(
   names(object.list) = as.character(-(1:length(object.list)))
 
   for (ii in 1:nrow(sample.tree)) {
+
+    idx = Seurat:::ParseMergePair(sample.tree, ii)
+
     merge.pair = as.character(sample.tree[ii, ])
     length1 = ncol(object.list[[merge.pair[1]]])
     length2 = ncol(object.list[[merge.pair[2]]])
+
+    length1 = max(median.nfeature[idx$object1])
+    length2 = max(median.nfeature[idx$object2])
 
     if (length2 > length1) {
       merge.pair = rev(x = merge.pair)
@@ -114,7 +123,7 @@ FastPairwiseIntegrateReference = function(
         " into ",
         paste(datasets$object1, collapse = " ")
       )
-      message(paste0("length1:", length1, "," , "length2:", length2))
+      # message(paste0("length1:", length1, "," , "length2:", length2))
     }
 
     integrated.matrix = FastRunIntegration(

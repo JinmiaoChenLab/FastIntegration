@@ -50,10 +50,14 @@ FastFindAnchors = function(
 
     sample.tree = Seurat:::BuildSampleTree(rna.cor)
 
+
+    median.nfeature = readRDS(paste0(tmp.dir, "/FastIntegrationTmp/others/median_nfeature.rds"))
+
     paired = c(1, 2)
     for (j in 1:nrow(sample.tree)) {
       idx = Seurat:::ParseMergePair(sample.tree, j)
-      if (sum(ncell[idx$object2]) > sum(ncell[idx$object1])) {
+      # if (sum(ncell[idx$object2]) > sum(ncell[idx$object1])) {
+      if (max(median.nfeature[idx$object2]) > max(median.nfeature[idx$object1])) {
         tmp = idx$object2
         idx$object2 = idx$object1
         idx$object1 = tmp
@@ -274,8 +278,14 @@ BuildIntegrationFile = function(
   object.ncells = sapply(X = rna.list, FUN = function(x) dim(x = x)[2])
   offsets = as.vector(x = cumsum(x = c(0, object.ncells)))[1:length(x = rna.list)]
 
+  median.nfeature = unlist(lapply(rna.list, function(rna){
+    return(median(rna$nFeature_RNA))
+  }))
+
   saveRDS(features, paste0(tmp.dir, "/FastIntegrationTmp/others/features.rds"))
   saveRDS(object.ncells, paste0(tmp.dir, "/FastIntegrationTmp/others/object_ncells.rds"))
+  saveRDS(median.nfeature, paste0(tmp.dir, "/FastIntegrationTmp/others/median_nfeature.rds"))
+
   saveRDS(offsets, paste0(tmp.dir, "/FastIntegrationTmp/others/offsets.rds"))
   return(NULL)
 }

@@ -56,8 +56,8 @@ FastFindAnchors = function(
     paired = c(1, 2)
     for (j in 1:nrow(sample.tree)) {
       idx = Seurat:::ParseMergePair(sample.tree, j)
-      # if (sum(ncell[idx$object2]) > sum(ncell[idx$object1])) {
-      if (max(median.nfeature[idx$object2]) > max(median.nfeature[idx$object1])) {
+      if (sum(ncell[idx$object2]) > sum(ncell[idx$object1])) {
+      # if (max(median.nfeature[idx$object2]) > max(median.nfeature[idx$object1])) {
         tmp = idx$object2
         idx$object2 = idx$object1
         idx$object1 = tmp

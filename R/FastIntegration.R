@@ -101,8 +101,8 @@ FastPairwiseIntegrateReference = function(
     length1 = ncol(object.list[[merge.pair[1]]])
     length2 = ncol(object.list[[merge.pair[2]]])
 
-    length1 = max(median.nfeature[idx$object1])
-    length2 = max(median.nfeature[idx$object2])
+    # length1 = max(median.nfeature[idx$object1])
+    # length2 = max(median.nfeature[idx$object2])
 
     if (length2 > length1) {
       merge.pair = rev(x = merge.pair)

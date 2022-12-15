@@ -57,20 +57,6 @@ for (i in 1:length(rna.list)) {
 }
 ```
 
-### Onestop function
-
-For large sample size (\> 200 samples), we recommend to use step by step integration.
-
-``` r
-library(FastIntegration)
-# rna.list is the list of seurat object
-data = OneStopIntegration(
-  rna.list = rna.list, 
-  tmp.dir = "./test/", 
-  max.cores = 30
-)
-```
-
 ### Step by step integration
 
 ``` r

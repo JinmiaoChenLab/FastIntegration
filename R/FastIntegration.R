@@ -14,7 +14,7 @@ FastIntegration = function(
   npcs = 1:30,
   nn.k = 100,
   slot = c("data", "counts"),
-  cut.low = 0.1,
+  cut.low = -0.1,
   verbose = T
 ) {
   data.table::setDTthreads(threads = 1L)

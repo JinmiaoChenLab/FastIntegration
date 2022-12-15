@@ -4,7 +4,7 @@ FastIntegration is a fast and high-capacity version of Seurat Integration. FastI
 
 **Recent update: New functions which allow users to filter and download data in DISCO (<https://www.immunesinglecell.org/repository>), comprising 5200+ single-cell samples!**
 
-More vignettes can be found at https://immunesinglecell.org/vignette/docs/FastIntegration/cell-type-atlas
+More vignettes can be found at https://immunesinglecell.org/vignette/docs/DISCO/FastIntegration/cell-type-atlas
 
 
 ## Requirement

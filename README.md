@@ -51,6 +51,7 @@ devtools::install_github("git@github.com:JinmiaoChenLab/FastIntegrate.git")
 ``` r
 library(Seurat)
 library(pbmcapply)
+library(stringr)
 rna.list = readRDS("rna_list.rds") # read list of Seurat object, each element in list is a sample
 
 # make all samples have same genes

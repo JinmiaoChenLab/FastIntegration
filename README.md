@@ -1,8 +1,12 @@
 # FastIntegration v1.1.0
 
-FastIntegration is a fast and high-capacity version of Seurat Integration. FastIntegrate can integrate thousands of scRNA-seq datasets and outputs batch-corrected values for downstream analysis.
+FastIntegration provides two main functions:
 
-**Recent update: New functions which allow users to filter and download data in DISCO (<https://www.immunesinglecell.org/repository>), comprising 5200+ single-cell samples!**
+- A fast and high-capacity version of Seurat Integration
+- Access data from [DISCO](https://www.immunesinglecell.org/) database
+
+**Recent update: 
+Thanks to [Nathan Siemers](https://github.com/NathanSiemers) for reporting [bugs](https://github.com/JinmiaoChenLab/FastIntegration/issues/6) and providing [suggestions](https://github.com/JinmiaoChenLab/FastIntegration/issues/6) on DownloadDiscoData function. We have added resume download functions in the new version.
 
 More vignettes can be found at https://immunesinglecell.org/vignette/docs/DISCO/FastIntegration/cell-type-atlas
 
@@ -19,6 +23,8 @@ FastIntegration requires the following packages:
 -   [tictoc](https://cran.r-project.org/web/packages/tictoc/index.html)
 -   [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)
 -   [pbmcapply](https://cran.r-project.org/web/packages/pbmcapply/index.html)
+-   [stringr](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+-   [tools](https://www.rdocumentation.org/packages/tools/versions/3.6.2)
 
 We highly recommend you to build R with openblas which will accelerate integration 2-3x times.
 
@@ -136,9 +142,13 @@ rna.data = RunUMAP(rna.data, dims = 1:50)
 meta = FindSampleByMetadata(tissue = c("blood", "kidney"))
 
 ##### Download sample ##### 
-# You can further filter cells by specifying expressed or unexpressed genes.
 # dir is the location where the files are saved
-DownloadDiscoData(meta, expressed.gene = c("CD3E"), unexpressed.gene = c("CD8A"), dir = "./disco") # mostly CD4 T cells (CD3E+CD8A-)
+DownloadDiscoData(meta, dir = "./disco") # mostly CD4 T cells (CD3E+CD8A-)
+
+##### Recover counts slot  #####
+# To reduce file size, we removed counts slot from data. You can recover it as follow:
+rna = readRDS("/test/AML0024_3p.rds")
+rna = AddCountsSlot(rna)
 
 ```
 

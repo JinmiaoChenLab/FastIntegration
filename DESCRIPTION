@@ -15,14 +15,16 @@ Depends:
     data.table,
     R (>= 4.0.0),
     Seurat (>= 4.0.0),
-    SeuratObject (>= 4.0.0)
+    SeuratObject (>= 4.0.0),
 Imports:
     dplyr,
     Matrix,
     parallel,
     pbmcapply,
     Rfast,
-    tictoc
+    tictoc,
+    stringr,
+    tools
 LinkingTo: 
     Rcpp (>= 0.11.0),
     RcppEigen

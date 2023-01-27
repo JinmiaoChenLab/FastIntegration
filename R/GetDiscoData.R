@@ -22,12 +22,12 @@ GetDiscoSample = function(
 #' @import jsonlite
 #' @export
 FindSampleByMetadata = function(
-  tissue = c(),
-  disease = c(),
-  platform = c(),
-  project.id = c(),
-  sample.id = c(),
-  sample.type = c()
+    tissue = c(),
+    disease = c(),
+    platform = c(),
+    project.id = c(),
+    sample.id = c(),
+    sample.type = c()
 ) {
   meta.all =  GetDiscoSample()
   if (length(tissue) > 0) {
@@ -57,50 +57,26 @@ FindSampleByMetadata = function(
 #' @export
 DownloadDiscoData = function(
     metadata,
-    expressed.gene = c(),
-    unexpressed.gene = c(),
     dir = "./disco_data"
 ) {
-
+  options(timeout = 20*60)
   meta = metadata
   dir.create(dir)
   tryCatch(
     {
       for (i in 1:nrow(meta)) {
-        message(paste0("Downloading the ", i, "st sample"))
-        rna = readRDS(url(paste0(
-          "http://dc.vishuo.com:8887/api/vishuo/download/getExp?project=",meta$projectId[i],"&sample=",meta$sampleId[i]
-        )))
-
-        if (length(expressed.gene) > 0) {
-          for (j in 1:length(expressed.gene)) {
-            if (length(which(rna@assays$RNA@data[expressed.gene[j],] > 0)) > 0) {
-              rna = subset(rna, cells = names(which(rna@assays$RNA@data[expressed.gene[j],] > 0)))
-            } else {
-              rna = NULL
-              break
-            }
-          }
-        }
-
-        if (length(unexpressed.gene) > 0) {
-          for (j in 1:length(unexpressed.gene)) {
-            if (length(which(rna@assays$RNA@data[unexpressed.gene[j],] == 0)) > 0) {
-              rna = subset(rna, cells = names(which(rna@assays$RNA@data[unexpressed.gene[j],] == 0)))
-            } else {
-              rna = NULL
-              break
-            }
-          }
-        }
-
-        if (is.null(rna) == F) {
-          rna@assays$RNA@counts = expm1(rna@assays$RNA@data)
-          saveRDS(rna, paste0(dir, "/", meta$sampleId[i], ".rds"), compress = F)
+        outpur.file = paste0(dir, "/", meta$sampleId[i], ".rds")
+        if (file.exists(outpur.file) & tools::md5sum(outpur.file) == meta$md5[i]) {
+          message(paste0(i, "st sample has been downloaded before. Ignore..."))
         } else {
-          message(paste0("Sking the ", i, "st sample. No cells are found after filtering."))
+          message(paste0("Downloading the ", i, "st sample"))
+          # rna = readRDS(url(paste0(
+          #   "http://dc.vishuo.com:8887/api/vishuo/download/getExp?project=",meta$projectId[i],"&sample=",meta$sampleId[i]
+          # )))
+          download.file(paste0("http://dc.vishuo.com:8887/api/vishuo/download/getExp?project=",meta$projectId[i],"&sample=",meta$sampleId[i]),
+                        paste0(dir, "/", meta$sampleId[i], ".rds"))
+          # saveRDS(rna, paste0(dir, "/", meta$sampleId[i], ".rds"), compress = F)
         }
-
       }
     },
     error=function(cond) {
@@ -111,6 +87,10 @@ DownloadDiscoData = function(
 }
 
 
+AddCountsSlot = function(rna) {
+  rna@assays$RNA@counts = sweep(expm1(rna@assays$RNA@data), 2, rna$nCount_RNA, `*`) /10000
+  return(rna)
+}
 
 
 
